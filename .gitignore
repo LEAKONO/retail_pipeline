@@ -1,0 +1,30 @@
+# Credentials
+.env
+*.key
+*.pem
+secrets/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+venv/
+.venv/
+env/
+
+# Data files
+data/*.csv
+data/*.xlsx
+data/*.parquet
+
+# Logs
+logs/
+*.log
+
+# IDE
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

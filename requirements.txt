@@ -1,0 +1,10 @@
+pandas==2.2.2
+numpy==1.26.4
+snowflake-connector-python==3.10.1
+snowflake-sqlalchemy==1.6.1
+pydantic-settings==2.3.4
+python-dotenv==1.0.1
+loguru==0.7.2
+pytest==8.2.2
+pytest-mock==3.14.0
+ruff==0.4.9
