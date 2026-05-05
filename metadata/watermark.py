@@ -4,6 +4,14 @@ from core.logger import logger
 from core.exceptions import WatermarkError
 
 
+def _to_str(value):
+    if value is None:
+        return None
+    if hasattr(value, "strftime"):
+        return value.strftime("%Y-%m-%d %H:%M:%S")
+    return value
+
+
 CREATE_WATERMARK_TABLE = """
 CREATE TABLE IF NOT EXISTS pipeline_watermark (
     pipeline_name     VARCHAR(100)  NOT NULL,
@@ -49,8 +57,7 @@ WHEN NOT MATCHED THEN INSERT (
 """
 
 
-def ensure_watermark_table(conn: SnowflakeConnection) -> None:
-    """Create watermark table if it does not exist."""
+def ensure_watermark_table(conn):
     try:
         conn.execute_query(CREATE_WATERMARK_TABLE)
         logger.debug("Watermark table ready")
@@ -58,50 +65,31 @@ def ensure_watermark_table(conn: SnowflakeConnection) -> None:
         raise WatermarkError(f"Failed to create watermark table: {str(e)}") from e
 
 
-def read_watermark(
-    conn:          SnowflakeConnection,
-    pipeline_name: str,
-    source_table:  str,
-) -> tuple:
+def read_watermark(conn, pipeline_name, source_table):
     try:
         rows = conn.execute_query(READ_WATERMARK, {
             "pipeline_name": pipeline_name,
             "source_table":  source_table,
         })
-
         if not rows:
             logger.info("No watermark found — this is a first run")
             return None, None
-
-        logger.info(
-            "Watermark read: last_processed_at={ts}",
-            ts=rows[0]["last_processed_at"]
-        )
+        logger.info("Watermark read: last_processed_at={ts}", ts=rows[0]["last_processed_at"])
         return rows[0]["last_processed_at"], rows[0]["last_invoice_no"]
-
     except WatermarkError:
         raise
     except Exception as e:
         raise WatermarkError(f"Failed to read watermark: {str(e)}") from e
 
 
-def write_watermark(
-    conn:              SnowflakeConnection,
-    pipeline_name:     str,
-    source_table:      str,
-    last_processed_at: datetime,
-    last_invoice_no:   str,
-) -> None:
+def write_watermark(conn, pipeline_name, source_table, last_processed_at, last_invoice_no):
     try:
         conn.execute_query(WRITE_WATERMARK, {
             "pipeline_name":     pipeline_name,
             "source_table":      source_table,
-            "last_processed_at": last_processed_at,
+            "last_processed_at": _to_str(last_processed_at),
             "last_invoice_no":   last_invoice_no,
         })
-        logger.info(
-            "Watermark updated: {ts}",
-            ts=last_processed_at
-        )
+        logger.info("Watermark updated: {ts}", ts=last_processed_at)
     except Exception as e:
         raise WatermarkError(f"Failed to write watermark: {str(e)}") from e

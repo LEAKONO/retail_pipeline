@@ -4,6 +4,14 @@ from core.logger import logger
 from core.exceptions import AuditError
 
 
+def _to_str(value):
+    if value is None:
+        return None
+    if hasattr(value, "strftime"):
+        return value.strftime("%Y-%m-%d %H:%M:%S")
+    return value
+
+
 CREATE_AUDIT_TABLE = """
 CREATE TABLE IF NOT EXISTS pipeline_audit (
     batch_id         VARCHAR(100)  NOT NULL PRIMARY KEY,
@@ -58,8 +66,7 @@ WHEN NOT MATCHED THEN INSERT (
 """
 
 
-def ensure_audit_table(conn: SnowflakeConnection) -> None:
-    """Create audit table if it does not exist."""
+def ensure_audit_table(conn):
     try:
         conn.execute_query(CREATE_AUDIT_TABLE)
         logger.debug("Audit table ready")
@@ -67,12 +74,7 @@ def ensure_audit_table(conn: SnowflakeConnection) -> None:
         raise AuditError(f"Failed to create audit table: {str(e)}") from e
 
 
-def start_audit(
-    conn:          SnowflakeConnection,
-    batch_id:      str,
-    pipeline_name: str,
-    started_at:    datetime,
-) -> None:
+def start_audit(conn, batch_id, pipeline_name, started_at):
     try:
         conn.execute_query(UPSERT_AUDIT, {
             "batch_id":         batch_id,
@@ -80,7 +82,7 @@ def start_audit(
             "status":           "in_progress",
             "records_read":     0,
             "records_loaded":   0,
-            "started_at":       started_at,
+            "started_at":       _to_str(started_at),
             "completed_at":     None,
             "duration_seconds": None,
             "error_message":    None,
@@ -90,17 +92,9 @@ def start_audit(
         logger.warning("Failed to start audit: {e}", e=str(e))
 
 
-def complete_audit(
-    conn:           SnowflakeConnection,
-    batch_id:       str,
-    pipeline_name:  str,
-    started_at:     datetime,
-    records_read:   int,
-    records_loaded: int,
-) -> None:
+def complete_audit(conn, batch_id, pipeline_name, started_at, records_read, records_loaded):
     completed_at     = datetime.utcnow()
     duration_seconds = (completed_at - started_at).total_seconds()
-
     try:
         conn.execute_query(UPSERT_AUDIT, {
             "batch_id":         batch_id,
@@ -108,30 +102,20 @@ def complete_audit(
             "status":           "success",
             "records_read":     records_read,
             "records_loaded":   records_loaded,
-            "started_at":       started_at,
-            "completed_at":     completed_at,
+            "started_at":       _to_str(started_at),
+            "completed_at":     _to_str(completed_at),
             "duration_seconds": duration_seconds,
             "error_message":    None,
         })
-        logger.info(
-            "Pipeline complete: {loaded} records in {secs:.1f}s",
-            loaded=records_loaded,
-            secs=duration_seconds
-        )
+        logger.info("Pipeline complete: {loaded} records in {secs:.1f}s",
+                    loaded=records_loaded, secs=duration_seconds)
     except Exception as e:
         logger.warning("Failed to complete audit: {e}", e=str(e))
 
 
-def fail_audit(
-    conn:          SnowflakeConnection,
-    batch_id:      str,
-    pipeline_name: str,
-    started_at:    datetime,
-    error_message: str,
-) -> None:
+def fail_audit(conn, batch_id, pipeline_name, started_at, error_message):
     completed_at     = datetime.utcnow()
     duration_seconds = (completed_at - started_at).total_seconds()
-
     try:
         conn.execute_query(UPSERT_AUDIT, {
             "batch_id":         batch_id,
@@ -139,8 +123,8 @@ def fail_audit(
             "status":           "failed",
             "records_read":     0,
             "records_loaded":   0,
-            "started_at":       started_at,
-            "completed_at":     completed_at,
+            "started_at":       _to_str(started_at),
+            "completed_at":     _to_str(completed_at),
             "duration_seconds": duration_seconds,
             "error_message":    error_message[:2000],
         })
