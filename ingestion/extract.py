@@ -5,6 +5,12 @@ from pathlib import Path
 from core.config import settings
 from core.logger import logger
 from core.exceptions import ExtractionError
+"""
+This for schema validation  I expect the CSV to have exactly these column names."
+If the source data changes (e.g. someone renames "Customer ID" to "CustomerID"),
+the pipeline will fail loudly instead of silently producing wrong results. 
+This is called schema validation and it's a data engineering best practice.
+"""
 EXPECTED_COLUMNS = {
     "Invoice",
     "StockCode",
