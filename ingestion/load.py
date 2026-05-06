@@ -43,7 +43,7 @@ CREATE_STAGE = """
 CREATE STAGE IF NOT EXISTS raw_orders_stage
     FILE_FORMAT = (
         TYPE = CSV
-        FIELD_OPTIONALLY_ENCLOSED_BY = '"\'
+        FIELD_OPTIONALLY_ENCLOSED_BY = '"'
         NULL_IF = ('NULL', 'null', '')
         EMPTY_FIELD_AS_NULL = TRUE
         TIMESTAMP_FORMAT = 'YYYY-MM-DD HH24:MI:SS'
@@ -84,7 +84,7 @@ SELECT
 FROM @raw_orders_stage/{filename}
 FILE_FORMAT = (
     TYPE = CSV
-    FIELD_OPTIONALLY_ENCLOSED_BY = '"\'
+    FIELD_OPTIONALLY_ENCLOSED_BY = '"'
     NULL_IF = ('NULL', 'null', '')
     EMPTY_FIELD_AS_NULL = TRUE
     TIMESTAMP_FORMAT = 'YYYY-MM-DD HH24:MI:SS'

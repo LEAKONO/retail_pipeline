@@ -37,16 +37,12 @@ QUALITY_RULES = {
 
 
 def rename_columns(df: pd.DataFrame) -> pd.DataFrame:
-    #Rename source columns to snake_case standard.
     df = df.rename(columns=COLUMN_MAPPING)
     logger.debug("Columns renamed to snake_case")
     return df
 
 
 def cast_data_types(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Cast each column to its correct Python/Snowflake type.
-    """
     try:
         for col in ["invoice_no", "stock_code", "description", "country"]:
             if col in df.columns:
@@ -56,10 +52,8 @@ def cast_data_types(df: pd.DataFrame) -> pd.DataFrame:
         df["quantity"]   = pd.to_numeric(df["quantity"],   errors="coerce")
         df["unit_price"] = pd.to_numeric(df["unit_price"], errors="coerce")
 
-        # Customer ID — nullable string (many orders have no customer ID)
         if "customer_id" in df.columns:
             df["customer_id"] = df["customer_id"].astype(str).str.strip()
-            # Replace "nan" strings that come from null float conversion
             df["customer_id"] = df["customer_id"].replace("nan", None)
 
         # Confirm it is datetime type
@@ -76,11 +70,10 @@ def cast_data_types(df: pd.DataFrame) -> pd.DataFrame:
 
 def remove_duplicates(df: pd.DataFrame) -> pd.DataFrame:
     
-    #Remove duplicate records based on natural key.
     before = len(df)
     df = df.drop_duplicates(
         subset=["invoice_no", "stock_code", "invoice_date"],
-        keep="last"   # Keep most recent version of duplicate
+        keep="last"   
     )
     after = len(df)
 
@@ -94,24 +87,19 @@ def remove_duplicates(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def validate_quality(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
-    #Apply data quality rules and split into good and bad records.
     error_mask = pd.Series([False] * len(df), index=df.index)
     error_reasons = pd.Series([""] * len(df), index=df.index)
-
-    # Rule 1: Required columns must not be null
     for col, rules in QUALITY_RULES.items():
         if not rules["nullable"] and col in df.columns:
             null_mask = df[col].isna()
             error_reasons[null_mask] += f"{col} is null; "
             error_mask = error_mask | null_mask
 
-    # Rule 2: Numeric minimums
     if "unit_price" in df.columns:
         negative_price = df["unit_price"] < 0
         error_reasons[negative_price] += "unit_price is negative; "
         error_mask = error_mask | negative_price
 
-    # Split into clean and error DataFrames
     clean_df  = df[~error_mask].copy()
     errors_df = df[error_mask].copy()
 
@@ -132,7 +120,6 @@ def validate_quality(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
 
 
 def add_audit_columns(df: pd.DataFrame, batch_id: str) -> pd.DataFrame:
-    # Add pipeline metadata columns to every record.
     import uuid
     from datetime import datetime
 
@@ -144,7 +131,6 @@ def add_audit_columns(df: pd.DataFrame, batch_id: str) -> pd.DataFrame:
 
 
 def transform(df: pd.DataFrame, batch_id: str) -> tuple[pd.DataFrame, pd.DataFrame]:
-    #Main transformation function called by main.py.
     if df.empty:
         logger.info("Empty DataFrame received — nothing to transform")
         return df, pd.DataFrame()
