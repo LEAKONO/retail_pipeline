@@ -1,0 +1,28 @@
+version: 2
+
+sources:
+  - name: raw
+    database: RETAIL_DB
+    schema: RAW
+    description: "Raw data loaded by Python ingestion pipeline"
+    
+    tables:
+      - name: raw_orders
+        description: "Raw order line items from Online Retail II dataset"
+        columns:
+          - name: invoice_no
+            description: "Invoice number. Prefix C = cancellation"
+          - name: stock_code
+            description: "Product stock code"
+          - name: description
+            description: "Product description"
+          - name: quantity
+            description: "Quantity ordered. Negative for cancellations"
+          - name: invoice_date
+            description: "Date and time of invoice"
+          - name: unit_price
+            description: "Price per unit in GBP"
+          - name: customer_id
+            description: "Customer identifier. Nullable for guest orders"
+          - name: country
+            description: "Country of customer"

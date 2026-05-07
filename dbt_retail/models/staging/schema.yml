@@ -1,0 +1,49 @@
+version: 2
+
+models:
+  - name: stg_orders
+    description: "Cleaned and standardized order line items"
+    
+    columns:
+      - name: invoice_no
+        description: "Invoice number"
+        tests:
+          - not_null
+
+      - name: stock_code
+        description: "Product stock code"
+        tests:
+          - not_null
+
+      - name: is_cancelled
+        description: "True if this is a cancellation invoice"
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [true, false]
+
+      - name: quantity
+        description: "Quantity ordered. Negative for cancellations"
+        tests:
+          - not_null
+
+      - name: unit_price
+        description: "Price per unit in GBP"
+        tests:
+          - not_null
+
+      - name: line_total
+        description: "Total line value = quantity x unit_price"
+        tests:
+          - not_null
+
+      - name: invoice_date
+        description: "Timestamp of invoice"
+        tests:
+          - not_null
+
+      - name: country
+        description: "Customer country uppercased"
+        tests:
+          - not_null
