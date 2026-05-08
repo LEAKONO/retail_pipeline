@@ -47,3 +47,38 @@ models:
         description: "Customer country uppercased"
         tests:
           - not_null
+
+  - name: stg_customers
+    description: "One row per customer derived from order history"
+    
+    columns:
+      - name: customer_id
+        description: "Unique customer identifier"
+        tests:
+          - not_null
+          - unique
+
+      - name: country
+        description: "Customer country from most recent order"
+        tests:
+          - not_null
+
+      - name: first_order_date
+        description: "Date of customer first order"
+        tests:
+          - not_null
+
+      - name: last_order_date
+        description: "Date of customer most recent order"
+        tests:
+          - not_null
+
+      - name: total_orders
+        description: "Total number of distinct invoices"
+        tests:
+          - not_null
+
+      - name: lifetime_revenue
+        description: "Total revenue across all orders including cancellations"
+        tests:
+          - not_null
