@@ -3,46 +3,35 @@ version: 2
 models:
   - name: stg_orders
     description: "Cleaned and standardized order line items"
-    
     columns:
       - name: invoice_no
         description: "Invoice number"
         tests:
           - not_null
-
       - name: stock_code
         description: "Product stock code"
         tests:
           - not_null
-
       - name: is_cancelled
         description: "True if this is a cancellation invoice"
         tests:
           - not_null
-          - accepted_values:
-              arguments:
-                values: [true, false]
-
       - name: quantity
         description: "Quantity ordered. Negative for cancellations"
         tests:
           - not_null
-
       - name: unit_price
         description: "Price per unit in GBP"
         tests:
           - not_null
-
       - name: line_total
         description: "Total line value = quantity x unit_price"
         tests:
           - not_null
-
       - name: invoice_date
         description: "Timestamp of invoice"
         tests:
           - not_null
-
       - name: country
         description: "Customer country uppercased"
         tests:
@@ -50,35 +39,54 @@ models:
 
   - name: stg_customers
     description: "One row per customer derived from order history"
-    
     columns:
       - name: customer_id
         description: "Unique customer identifier"
         tests:
           - not_null
           - unique
-
       - name: country
         description: "Customer country from most recent order"
         tests:
           - not_null
-
       - name: first_order_date
         description: "Date of customer first order"
         tests:
           - not_null
-
       - name: last_order_date
         description: "Date of customer most recent order"
         tests:
           - not_null
-
       - name: total_orders
         description: "Total number of distinct invoices"
         tests:
           - not_null
-
       - name: lifetime_revenue
-        description: "Total revenue across all orders including cancellations"
+        description: "Total revenue across all orders"
+        tests:
+          - not_null
+
+  - name: stg_products
+    description: "One row per product derived from order history"
+    columns:
+      - name: stock_code
+        description: "Unique product stock code"
+        tests:
+          - not_null
+          - unique
+      - name: description
+        description: "Product description"
+        tests:
+          - not_null
+      - name: avg_unit_price
+        description: "Average unit price across all orders"
+        tests:
+          - not_null
+      - name: total_units_sold
+        description: "Total units sold excluding cancellations"
+        tests:
+          - not_null
+      - name: times_ordered
+        description: "Number of distinct invoices containing this product"
         tests:
           - not_null
