@@ -1,25 +1,14 @@
 /*
     dim_date.sql
-    ------------
-    Calendar dimension table.
-    One row per date covering our dataset range.
     
-    Why generate dates instead of extracting from orders?
-        If no orders happened on a Tuesday, that date still
-        needs to exist in dim_date so reports show zero
-        instead of missing that day entirely.
-    
-    Source: Generated using Snowflake date functions
-    Target: MARTS.dim_date (table)
 */
 
 WITH date_spine AS (
 
     -- Generate one row per day from 2009-01-01 to 2012-12-31
-    -- Covers full range of our dataset plus buffer
     SELECT
         DATEADD(DAY, SEQ4(), '2009-01-01'::DATE) AS full_date
-    FROM TABLE(GENERATOR(ROWCOUNT => 1461))  -- 4 years of dates
+    FROM TABLE(GENERATOR(ROWCOUNT => 1461))
 
 ),
 

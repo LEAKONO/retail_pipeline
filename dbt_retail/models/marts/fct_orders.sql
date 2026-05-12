@@ -1,20 +1,7 @@
 /*
     fct_orders.sql
-    --------------
-    Orders fact table.
-    One row per order line item — the grain of this table.
-    
-    Source: STAGING.stg_orders
-    Target: MARTS.fct_orders (table)
-    
     Grain: one row = one product line on one invoice
-    
-    Why keep cancelled orders?
-        Cancellations are business events.
-        Analysts need them to calculate:
-        - Cancellation rate
-        - Net revenue (gross - cancellations)
-        - Which products get cancelled most
+
 */
 
 WITH orders AS (

@@ -75,13 +75,9 @@ models:
           - not_null
           - unique
       - name: description
-        description: "Product description"
-        tests:
-          - not_null
+        description: "Product description. Nullable in source data"
       - name: avg_unit_price
-        description: "Average unit price across all orders"
-        tests:
-          - not_null
+        description: "Average unit price. Nullable for zero-price entries"
       - name: total_units_sold
         description: "Total units sold excluding cancellations"
         tests:

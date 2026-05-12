@@ -1,4 +1,7 @@
-
+/*
+    stg_products.sql
+    ----------------
+*/
 
 WITH orders AS (
 
@@ -9,19 +12,29 @@ WITH orders AS (
 products AS (
 
     SELECT
-        -- Product identifier
         TRIM(stock_code)                          AS stock_code,
-        MAX(TRIM(description))                    AS description,
 
-        -- Pricing metrics
-        AVG(unit_price)                           AS avg_unit_price,
-        MIN(unit_price)                           AS min_unit_price,
+        NULLIF(
+            MAX(TRIM(description)),
+            'nan'
+        )                                         AS description,
+
+        AVG(
+            CASE WHEN unit_price > 0
+            THEN unit_price END
+        )                                         AS avg_unit_price,
+
+        MIN(
+            CASE WHEN unit_price > 0
+            THEN unit_price END
+        )                                         AS min_unit_price,
+
         MAX(unit_price)                           AS max_unit_price,
 
-        -- Sales metrics (excluding cancellations)
         SUM(
             CASE
                 WHEN LEFT(invoice_no, 1) != 'C'
+                AND  quantity > 0
                 THEN quantity
                 ELSE 0
             END
@@ -30,15 +43,14 @@ products AS (
         COUNT(DISTINCT invoice_no)                AS times_ordered,
         COUNT(DISTINCT customer_id)               AS unique_customers,
 
-        -- Date range
         MIN(invoice_date)                         AS first_sold_date,
         MAX(invoice_date)                         AS last_sold_date
 
     FROM orders
 
-    -- Exclude rows with no stock code
     WHERE stock_code IS NOT NULL
     AND   TRIM(stock_code) != ''
+    AND   TRIM(stock_code) != 'nan'
     AND   stock_code NOT IN ('POST', 'D', 'M', 'BANK CHARGES', 'PADS')
 
     GROUP BY TRIM(stock_code)

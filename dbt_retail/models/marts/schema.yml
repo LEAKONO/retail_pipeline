@@ -40,9 +40,7 @@ models:
           - not_null
           - unique
       - name: description
-        description: "Product description"
-        tests:
-          - not_null
+        description: "Product description. Nullable in source data"
 
   - name: fct_orders
     description: "Orders fact table. One row per order line item."
