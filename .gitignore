@@ -29,3 +29,7 @@ logs/
 .DS_Store
 Thumbs.db
 airflow_venv/
+airflow/*.cfg
+airflow/*.pid
+airflow/logs/
+airflow/airflow.db
