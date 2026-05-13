@@ -33,3 +33,4 @@ airflow/*.cfg
 airflow/*.pid
 airflow/logs/
 airflow/airflow.db
+airflow/webserver_config.py
