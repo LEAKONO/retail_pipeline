@@ -14,7 +14,6 @@ final AS (
 
     SELECT
         -- Surrogate primary key
-        -- MD5 hash of natural key columns
         MD5(
             invoice_no || '-' || stock_code || '-' ||
             TO_VARCHAR(invoice_date, 'YYYY-MM-DD HH24:MI:SS')
