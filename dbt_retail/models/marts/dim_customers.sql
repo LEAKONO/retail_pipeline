@@ -1,7 +1,6 @@
 /*
     dim_customers.sql
     -----------------
-    Business-facing customer analytics model
 */
 
 WITH customers AS (

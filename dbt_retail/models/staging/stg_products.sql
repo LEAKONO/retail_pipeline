@@ -1,6 +1,3 @@
-/*
-    stg_products.sql
-*/
 
 WITH orders AS (
 
@@ -48,39 +45,9 @@ products AS (
     FROM orders
 
     WHERE stock_code IS NOT NULL
-    AND   TRIM(stock_code) != ''
-    AND   TRIM(stock_code) != 'nan'
-
-    -- Exclude known non-product stock codes
-    AND   UPPER(TRIM(stock_code)) NOT IN (
-        'POST', 'D', 'M', 'BANK CHARGES', 'PADS',
-        'DOT', 'CRUK', 'S', 'AMAZONFEE', 'B'
-    )
-
-    -- Exclude adjustment and error descriptions
-    AND   (
-        TRIM(description) IS NULL
-        OR (
-            LOWER(TRIM(description)) NOT LIKE '%wrong%'
-            AND LOWER(TRIM(description)) NOT LIKE '%damaged%'
-            AND LOWER(TRIM(description)) NOT LIKE '%missing%'
-            AND LOWER(TRIM(description)) NOT LIKE '%lost%'
-            AND LOWER(TRIM(description)) NOT LIKE '%check%'
-            AND LOWER(TRIM(description)) NOT LIKE '%mouldy%'
-            AND LOWER(TRIM(description)) NOT LIKE '%rusty%'
-            AND LOWER(TRIM(description)) NOT LIKE '%smashed%'
-            AND LOWER(TRIM(description)) NOT LIKE '%thrown%'
-            AND LOWER(TRIM(description)) NOT LIKE '%mailout%'
-            AND LOWER(TRIM(description)) NOT LIKE '%damages%'
-            AND LOWER(TRIM(description)) NOT LIKE '%found%'
-            AND LOWER(TRIM(description)) NOT LIKE '%dotcom%'
-            AND LOWER(TRIM(description)) NOT LIKE '%wet%'
-            AND LOWER(TRIM(description)) NOT LIKE 'nan'
-            AND LOWER(TRIM(description)) NOT LIKE '%crushed%'
-            AND LOWER(TRIM(description)) NOT LIKE '%broken%'
-            AND LOWER(TRIM(description)) NOT LIKE '%error%'
-        )
-    )
+    AND TRIM(stock_code) != ''
+    AND TRIM(stock_code) != 'nan'
+    AND stock_code NOT IN ('POST', 'D', 'M', 'BANK CHARGES', 'PADS')
 
     GROUP BY UPPER(TRIM(stock_code))
 
